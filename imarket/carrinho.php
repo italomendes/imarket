@@ -1,0 +1,268 @@
+<?php
+require_once 'class/usuario.class.php';
+require_once 'class/daousuario.class.php';
+require_once 'class/produto.class.php';
+require_once 'class/daoproduto.class.php';
+require_once 'class/venda.class.php';
+require_once 'class/daovenda.class.php';
+require_once 'class/vendaproduto.class.php';
+
+$vendaproduto = new VendaProduto();
+session_start();
+if(!isset($_SESSION['itens'])){
+    $_SESSION['itens'] = array();
+  }//else var_dump($_SESSION['itens']);
+/*if (isset($_SESSION['usuario'])) {
+  $usuario = $_SESSION['usuario'];
+  //var_dump($usuario);
+}else{
+  echo "<script> window.location.href='http://localhost/projetonovo/login.php'</script>";
+}*/
+
+//echo "<h1> Bem vindo usuario simples {$usuario->getNome()}</h1>";
+?>
+<!DOCTYPE html>
+  <html>
+    <head>
+      <meta charset="UTF-8">
+      <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+      <script type="text/javascript" src="js/materialize.min.js"></script>
+      <!--Import Google Icon Font-->
+      <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+      <!--Import materialize.css-->
+      <link type="text/css" rel="stylesheet" href="css/materialize.min.css"  media="screen,projection"/>
+      <link type="text/css" rel="stylesheet" href="css/new.css"/>
+
+      <!--Let browser know website is optimized for mobile-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    </head>
+
+    <body>
+      <script type="text/javascript">
+          $(document).ready(function() {
+          $('select').material_select();
+        });         
+      </script>
+      <!--Background -->
+      <div class="row ">
+        <div id="fundo-externo">
+          <div id="fundo">
+            <img src="img/mercado.png" alt="" />
+          </div>
+        </div>
+        <!--Começo do corpo -->
+        <div class="row ">
+          <div class=" col s10 offset-s1 card-panel  ">
+            <nav> <!--NavBar superior -->
+              <div class="collection nav-wrapper grey darken-3">
+                <a href="index.php" class="brand-logo"><img class="left" width="50px" height="50px" src="img/logo.png">iMarket</a>
+                <ul id="nav-mobile" class="right hide-on-med-and-down">
+                  <li class="active"><a href="carrinho.php"><i class="large material-icons">shopping_cart</i></a></li>
+                  <li><a href="conta.php">Minha conta</a></li>
+                  <li><a href="cadastrousuario.php">Cadastro</a></li>
+                  <li><a href="login.php">Login</a></li>
+                </ul>
+              </div>
+            </nav>
+            
+            <div class="row ">
+            <!--NavBar lateral -->
+              <ul class="col s2 nav collection" style="border: none;position: relative;top: -6.3px;margin-top: 8px; left: -9px">   
+                <li class="collection-item active grey darken-3"><h6 class="center">MENU</h6></li>
+                <a href="categoria.php?codigo=1" class="collection-item grey-text text-darken-3">Alimentos</a>
+                <a href="categoria.php?codigo=2" class="collection-item grey-text text-darken-3">Bebidas</a>
+                <a href="categoria.php?codigo=3" class="collection-item grey-text text-darken-3">Frios</a>
+                <a href="categoria.php?codigo=4" class="collection-item grey-text text-darken-3">Horti-fruti</a>
+                <a href="categoria.php?codigo=5" class="collection-item grey-text text-darken-3">Higiene</a>
+                <a href="categoria.php?codigo=6" class="collection-item grey-text text-darken-3">Limpeza</a>
+                <a href="categoria.php?codigo=7" class="collection-item grey-text text-darken-3">Padaria</a>
+                <a href="categoria.php?codigo=8" class="collection-item grey-text text-darken-3">Outros</a>
+              </ul>
+            
+              
+
+            <!--Começo do conteúdo -->
+            <div class="row collection transparent""> 
+              <div class="">
+                <div class="col s12 white darken-1">
+                  <h3 class="center">Carrinho</h3>
+                  
+                 <form method="POST">
+                 <table>
+                  <thead>
+                    <tr>
+                        <th>Produto</th>
+                        <th>Preço Unitário</th>
+                        <th>Quantidade</th>
+                        <th>Preço Total</th>
+                        <th>Remover</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                   <?php 
+                   $total = 0;
+                   echo "<tr>";
+                   //var_dump($_SESSION['itens']);
+                   foreach ($_SESSION['itens'] as $key => $value) {
+                    
+                    //$i = 0;
+                     # code...
+                    $produto = unserialize($value);
+                    $vendaproduto->setValor_unitario($produto->getValor());
+                    
+                    //var_dump($value);
+                    
+                    ?>
+                    <td>
+                      <a href="produto.php?codigo=<?php echo $produto->getIdproduto(); ?>">
+                        <div class="col s2">
+                          <img src="img/produtos/<?php echo $produto->getImg(); ?>" alt="" class="circle responsive-img"> <!-- notice the "circle" class -->
+                        </div>
+                        <div class="col s6">
+                          <span class="black-text center-align">
+                            <?php echo $produto->getNome(); ?>
+                          </span>  
+                        </div>
+                      </a>
+                    </td>
+                    <?php
+                      if ($produto->getTotal() == null) {
+                        $produto->setTotal($produto->getValor());
+                      }
+                    $total =  $total + $produto->getTotal();
+                    //echo "  <td>".$produto->getNome()."</td>";
+                    echo "  <td><label for='unitario".$produto->getIdProduto()."'>R$ </label><input class='input-field' id='unitario".$produto->getIdProduto()."' type='text' value=".$produto->getValor()."  name='unitario".$produto->getIdProduto()."' readonly></td>";
+                    echo "<td class=''><label for='quantidade".$produto->getIdProduto()."'>UN.</label><input class='center' id='qtd".$produto->getQuantidade()."' type='text' value = ".(($produto->getQuantidade() == null)?"1":$produto->getQuantidade())." name= 'quantidade".$produto->getIdProduto()."'></td>";
+                    echo "<td><label for='total".$produto->getIdProduto()."'>R$ </label><input name='total".$produto->getIdProduto()."' id='total".$produto->getIdProduto()."' value = ".$produto->getTotal()." readonly></td>";
+                    echo "<td class='center'><form method='POST'><button class='btn-floating grey darken-3 btn-small' id='' name='remove{$produto->getIdProduto()}'><i class='material-icons center'>delete</i></button></form></td>";
+                    echo "</tr>";
+                    //$value = array();
+                    if (isset($_POST['remove'.$produto->getIdProduto()])) {
+                      $key = array_search($value, $_SESSION['itens']);
+                      //var_dump($key);
+                      unset($_SESSION['itens'][$key]);
+                      if ($_SESSION['itens'][$key] == null) {
+                        echo "<script> window.location.href='http://localhost/projetonovo/carrinho.php'</script>";
+                      }
+                    }
+                    
+                      }
+                    
+                    //$i += 1;
+                    //echo "  <td> <input id='primeiroqtd'type='text' value = ".(($produto->getQuantidade() == null)?"1":$produto->getQuantidade())." name= 'quantidade".$produto->getIdProduto()."'> </td>";
+                    //echo " <td>".$produto->getTotal()."</td>";
+                    
+                   /*$arrays = array(1,2,3,4,5,6,'oi tudo bem');
+                   var_dump($arrays); 
+                   $key = array_search('oi tudo bem', $arrays, $strict = true);
+                   var_dump($key);
+                   $key = array_search($value, $_SESSION['itens']);
+                   var_dump($key);*/
+                    echo "<tr>";
+                    echo "<td></td>";
+                    echo "<td></td>";
+                    echo "<td>Total: </td>";
+                    echo "<td>R$ ".$total."</td>";
+                    echo "<td class='center'><button class='btn-floating waves-effect grey darken-3' type='submit' name='calcular'><i class='material-icons center'>update</i></button></td>";  
+                    echo "</tr>";
+                    
+                   ?>
+                  </tbody>
+                </table>
+                
+                <div class="row">
+                      <div class="col s12 center">
+                        <button class="btn waves-effect grey darken-3" type="submit" name="submit"><i class="material-icons right">send</i>Finalizar</button>
+                        <button class="btn waves-effect grey darken-3" type="delete" name="delete"><i class="material-icons right">remove_shopping_cart</i>Limpar</button>
+                      </div>
+                    </div>
+                    <?php 
+                      if (isset($_POST['delete'])) {
+                        unset($_SESSION['itens']);
+                        if ($_SESSION['itens'] == null) {
+                          echo "<script> window.location.href='http://localhost/projetonovo/carrinho.php'</script>";
+                        }
+                      }
+                      if(isset($_POST['submit'])){
+
+                        if (isset($_SESSION['usuario'])) {
+                          $usuario = $_SESSION['usuario'];
+
+                          //$usuario = unserialize($usuario);
+
+                          $venda = new Venda();
+                          $array = $_SESSION['itens'];
+                          /*$total = 0;
+                          foreach ($array as $key => $value) {
+                            # code...
+
+                            $produto = unserialize($value);
+                           $total =  $total + $produto->getTotal();
+                          }*/
+                          $venda->setValor($total);
+                          $dao = new DaoVenda();
+
+                          $dao->save($usuario,$array,$venda);
+                          /*if($dao->save($usuario,$array,$venda)){
+                            $to = $usuario->getEmail();
+                            $subject = "iMarket - Pedido realizado com sucesso!";
+                            $message = "Você comprou os seguintes itens: ";
+                            $header = "From: italomemendes@gmail.com";
+                            //mail($usuario->getEmail(), "iMakert - Pedido realizado com sucesso!", "Você comprou os seguintes itens: ".$array);
+                            mail($to, $subject, $message, $header);
+                          }*/
+                        }else{
+                          echo "<script> window.location.href='http://localhost/projetonovo/login.php'</script>";
+                        }
+
+                        
+
+                      }
+
+                      if(isset($_POST['calcular'])){
+                        $array = $_SESSION['itens'];
+                        $_SESSION['itens'] = array();
+                        echo $array;
+                        foreach ($array as $key => $value) {
+                          # code...
+                          
+                         var_dump($value);
+
+                          $produto = unserialize($value);
+
+                          $produto->setValor((float) $_POST['unitario'.$produto->getIdProduto()]);
+                          $produto->setQuantidade((float) $_POST['quantidade'.$produto->getIdProduto()]);
+                          $produto->setTotal( (float) $_POST['unitario'.$produto->getIdProduto()] * (float) $_POST['quantidade'.$produto->getIdProduto()]);
+
+
+                           array_push($_SESSION['itens'], serialize($produto));
+                    
+                        }
+                        
+                        echo "<script> window.location.href = window.location.href ;</script>";
+                      }
+                    
+                    ?>
+                    </form>
+                </div> 
+                
+
+              </div>
+            </div>
+              <nav class="collection"><!--Rodapé -->
+                <div class="nav row col s12 grey darken-3">
+                  <div class="col s10"> © Copyright 2016-2017 italomemendes@gmail.com - All Rights Reserved - Legal</div>
+                  <div class="col s2 right"><a href="administracao.php" class="right">Administração</a></div>
+                </div>
+              </nav>
+            </div>
+          </div>
+        </div><!--Fim do corpo -->
+      </div> 
+
+      <!--Import jQuery before materialize.js-->
+      <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+      <script type="text/javascript" src="js/materialize.min.js"></script>
+    </body>
+  </html>
